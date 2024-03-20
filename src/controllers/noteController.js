@@ -12,6 +12,7 @@ export const getNotes = async (req, res) => {
 
         const notes = await Note.find(findQuery, { userId: 0, __v: 0 })
 
+        // if (notes.length === 0) throw new Error("You don't have any note.")
 
         res.status(StatusCodes.OK).json({
             status: ReasonPhrases.OK,
