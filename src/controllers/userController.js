@@ -30,6 +30,8 @@ export const postUser = async (req, res) => {
 
         const newUser = new User({ name, email, password })
 
+        newUser.generateToken()
+
         const result = await newUser.save()
 
         res.status(StatusCodes.OK).json({
@@ -37,6 +39,8 @@ export const postUser = async (req, res) => {
             message: 'Data saved successfully',
             data: result
         })
+
+
 
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({

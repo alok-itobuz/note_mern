@@ -13,10 +13,10 @@ const noteSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
-    user: {
+    userId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
+    }]
 })
 
 const Note = mongoose.model('Note', noteSchema)
