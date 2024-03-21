@@ -8,9 +8,10 @@ class APIFeatures {
         if (this.queryUrl.search) {
             const key = Object.keys(this.queryUrl.search)[0]
             const value = Object.values(this.queryUrl.search)[0]
-            const searchRegex = new RegExp(value.toString(), 'i')
+            const searchRegex = new RegExp(value, 'i')
 
-            const mathingQuery = key !== 'isHidden' ? { [key]: { $regex: searchRegex } } : { isHidden: value === 'true' ? true : false }
+            const mathingQuery = value !== 'true' && value !== 'false' ? { [key]: { $regex: searchRegex } } : { [key]: value === 'true' ? true : false }
+            // const mathingQuery = key !== 'isHidden' ? { [key]: { $regex: searchRegex } } : { isHidden: value === 'true' ? true : false }
 
             this.queryMongoose = this.queryMongoose.find(mathingQuery)
         }
