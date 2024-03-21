@@ -5,7 +5,7 @@ import { createNote, deleteNote, getNotes, updateNote } from "../controllers/not
 const noteRouter = Router()
 
 
-noteRouter.route('/').get(getNotes).post(createNote)
+noteRouter.route('/').get(getNotes).post(createNote).delete(deleteNote)
 noteRouter.route('/:id').get(getNotes).patch(updateNote).delete(deleteNote)
 noteRouter.route('*').all(noRoute)
 

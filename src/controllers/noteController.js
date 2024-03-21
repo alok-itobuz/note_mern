@@ -1,20 +1,25 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes"
 import Note from "../models/noteSchema.js";
-import mongoose from "mongoose";
+import APIFeatures from "../utils/APIFeatures.js";
+
 
 export const getNotes = async (req, res) => {
     try {
         const id = req.params.id
-
         const userIdQuery = { userId: req.user._id }
+        const findQuery = id ? { _id: id } : { ...userIdQuery }
 
-        const findQuery = id ? { _id: id, ...userIdQuery } : { ...userIdQuery }
+        let query = Note.find(findQuery, { userId: 0, __v: 0 })
 
-        const notes = await Note.find(findQuery, { userId: 0, __v: 0 })
+        const apiFeatures = new APIFeatures(query, req.query)
 
-        // if (notes.length === 0) throw new Error("You don't have any note.")
+        const updatedState = apiFeatures.updated().search('title').sort()
 
-        res.status(StatusCodes.OK).json({
+        const notes = await updatedState.queryMongoose
+
+        if (notes.length === 0) throw new Error("You don't have any note.")
+
+        res.status(StatusCodes.OK).send({
             status: ReasonPhrases.OK,
             message: 'success',
             data: {
@@ -30,6 +35,7 @@ export const getNotes = async (req, res) => {
         })
     }
 }
+
 export const createNote = async (req, res) => {
     try {
         const { title, description } = req.body;
@@ -51,13 +57,21 @@ export const createNote = async (req, res) => {
         })
     }
 }
+
 export const updateNote = async (req, res) => {
     try {
         const id = req.params.id
+        const { title, description, idArray } = req.body;
+        let updatedNote;
 
-        const { title, description } = req.body;
+        if (idArray) {
+            updatedNote = await Note.updateMany({ _id: { $in: idArray } }, { isHidden: true }, { multi: true, new: true })
+        } else {
+            updatedNote = await Note.findOneAndUpdate({ _id: id }, { title, description, updatedAt: Date.now() }, { new: true })
+        }
 
-        const updatedNote = await Note.findOneAndUpdate({ _id: id }, { title, description }, { new: true })
+
+        console.log(updatedNote)
 
         res.status(StatusCodes.OK).json({
             status: ReasonPhrases.OK,
@@ -72,11 +86,19 @@ export const updateNote = async (req, res) => {
         })
     }
 }
+
 export const deleteNote = async (req, res) => {
     try {
         const id = req.params.id
 
-        const deletedNote = await Note.findOneAndDelete({ _id: id })
+        const isDeleteHidden = req.query.isHidden === 'true'
+
+        let findQuery = id ? { _id: id } : {}
+
+        findQuery = isDeleteHidden && !id ? { ...findQuery, isHidden: true } : findQuery
+
+        const deletedNote = await Note.deleteMany(findQuery)
+
 
         res.status(StatusCodes.OK).json({
             status: ReasonPhrases.OK,

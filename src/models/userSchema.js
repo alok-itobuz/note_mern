@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { JWT_SECRET } from "../config/config.js"
+import { JWT_SECRET, SALT } from "../config/config.js"
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -32,7 +33,14 @@ userSchema.methods.generateToken = function () {
     const token = jwt.sign({ id: this._id }, JWT_SECRET)
 
     this.tokens.push(token)
+
+    return token
 }
+
+userSchema.pre('save', function (next) {
+    this.password = bcrypt.hash(this.password, +SALT)
+    next()
+})
 
 const User = mongoose.model('User', userSchema)
 

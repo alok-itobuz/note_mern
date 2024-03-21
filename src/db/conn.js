@@ -1,8 +1,18 @@
 import mongoose from "mongoose";
 import { MONGODB_URL } from "../config/config.js";
 
-mongoose.connect(`${MONGODB_URL}/practice`).then(data => {
-    console.log('Successfully connected to database')
-}).catch(error => {
-    console.log('Error connecting to database', error)
-})
+
+const connectDB = () => {
+    mongoose.connect(`${MONGODB_URL}/practice`)
+
+    mongoose.connection.once('open', () => {
+        console.log('Connected to db successfully.')
+    })
+
+    mongoose.connection.on('error', () => {
+        console.log('Error connecting to db.')
+        mongoose.disconnect()
+    })
+}
+
+export default connectDB
