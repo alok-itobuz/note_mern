@@ -11,7 +11,6 @@ class APIFeatures {
             const searchRegex = new RegExp(value, 'i')
 
             const mathingQuery = value !== 'true' && value !== 'false' ? { [key]: { $regex: searchRegex } } : { [key]: value === 'true' ? true : false }
-            // const mathingQuery = key !== 'isHidden' ? { [key]: { $regex: searchRegex } } : { isHidden: value === 'true' ? true : false }
 
             this.queryMongoose = this.queryMongoose.find(mathingQuery)
         }

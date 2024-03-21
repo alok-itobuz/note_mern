@@ -13,7 +13,7 @@ export const getNotes = async (req, res) => {
 
         const apiFeatures = new APIFeatures(query, req.query)
 
-        const updatedState = apiFeatures.updated().search('title').sort()
+        const updatedState = apiFeatures.updated().search('title').sort().paginate()
 
         const notes = await updatedState.queryMongoose
 
