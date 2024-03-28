@@ -21,10 +21,6 @@ export default async function (req, res, next) {
         req.user = user
         next()
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }

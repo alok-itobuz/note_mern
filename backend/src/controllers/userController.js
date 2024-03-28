@@ -17,11 +17,7 @@ export const getUser = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -44,11 +40,7 @@ export const postUser = async (req, res) => {
 
 
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -69,11 +61,7 @@ export const updateUser = async (req, res) => {
             data
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -92,11 +80,7 @@ export const deleteUser = async (req, res) => {
             data
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -120,11 +104,7 @@ export const registerUser = async (req, res) => {
 
 
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 export const loginUser = async (req, res) => {
@@ -150,10 +130,6 @@ export const loginUser = async (req, res) => {
         })
 
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }

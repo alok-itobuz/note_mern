@@ -3,7 +3,7 @@ import Note from "../models/noteSchema.js";
 import APIFeatures from "../utils/APIFeatures.js";
 
 
-export const getNotes = async (req, res) => {
+export const getNotes = async (req, res, next) => {
     try {
         const id = req.params.id
         const userIdQuery = { userId: req.user._id }
@@ -13,7 +13,7 @@ export const getNotes = async (req, res) => {
 
         const apiFeatures = new APIFeatures(query, req.query)
 
-        const updatedState = apiFeatures.updated().search('title').sort().paginate()
+        const updatedState = apiFeatures.updated().search('title').sort()
 
         const notes = await updatedState.queryMongoose
 
@@ -28,11 +28,7 @@ export const getNotes = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -50,11 +46,7 @@ export const createNote = async (req, res) => {
             data: newNote
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -65,25 +57,18 @@ export const updateNote = async (req, res) => {
         let updatedNote;
 
         if (idArray) {
-            updatedNote = await Note.updateMany({ _id: { $in: idArray } }, { isHidden: true }, { multi: true, new: true })
+            if (!id) updatedNote = await Note.updateMany({ _id: { $in: idArray } }, { isHidden: true, updatedAt: Date.now() }, { multi: true, new: true })
+            else throw new Error('Invalid path')
         } else {
             updatedNote = await Note.findOneAndUpdate({ _id: id }, { title, description, updatedAt: Date.now() }, { new: true })
         }
-
-
-        console.log(updatedNote)
-
         res.status(StatusCodes.OK).json({
             status: ReasonPhrases.OK,
             message: 'success',
             data: updatedNote
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }
 
@@ -106,10 +91,6 @@ export const deleteNote = async (req, res) => {
             data: deletedNote
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            status: ReasonPhrases.BAD_REQUEST,
-            message: error.message,
-            data: null
-        })
+        next({ status: 'BAD_REQUEST', error })
     }
 }

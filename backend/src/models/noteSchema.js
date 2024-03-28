@@ -27,11 +27,13 @@ const noteSchema = new mongoose.Schema({
     }
 })
 
-noteSchema.pre('findOneAndUpdate', function (next) {
+noteSchema.pre("findOneAndUpdate", function (next) {
+    console.log('updated many', this.obj)
     this.updatedAt = Date.now()
 
     next()
 })
+
 
 const Note = mongoose.model('Note', noteSchema)
 
