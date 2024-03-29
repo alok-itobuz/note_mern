@@ -24,7 +24,7 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    let { email, password } = req.body;
+    let { email, password, isRemember } = req.body;
 
     const user = await User.findOne({ email }, { __v: 0 });
 
@@ -34,13 +34,18 @@ export const loginUser = async (req, res, next) => {
 
     if (!isPasswordMatch) throw new Error("Invalid password");
 
-    const token = await user.generateToken();
+
+    const token = await user.generateToken(isRemember);
 
     res.status(StatusCodes.OK).json({
       status: ReasonPhrases.OK,
       message: "Login successful.",
       data: {
-        user,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        },
         token,
       },
     });

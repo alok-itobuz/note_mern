@@ -8,14 +8,15 @@ class APIFeatures {
     if (this.queryUrl.search) {
       const key = Object.keys(this.queryUrl.search)[0];
       const value = Object.values(this.queryUrl.search)[0];
+
       const searchRegex = new RegExp(value, "i");
 
-      const mathingQuery =
+      const matchingQuery =
         value !== "true" && value !== "false"
           ? { [key]: { $regex: searchRegex } }
           : { [key]: value === "true" ? true : false };
 
-      this.queryMongoose = this.queryMongoose.find(mathingQuery);
+      this.queryMongoose = this.queryMongoose.find(matchingQuery);
     }
 
     return this;

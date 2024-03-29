@@ -8,11 +8,12 @@ export const getNotes = async (req, res, next) => {
     const userIdQuery = { userId: req.user._id };
     const findQuery = id ? { _id: id } : { ...userIdQuery };
 
-    let query = Note.find(findQuery, { userId: 0, __v: 0 });
+
+    let query = Note.find(findQuery, { __v: 0 });
 
     const apiFeatures = new APIFeatures(query, req.query);
 
-    const updatedState = apiFeatures.updated().search("title").sort();
+    const updatedState = apiFeatures.updated().search().sort();
 
     const notes = await updatedState.queryMongoose;
 
@@ -52,14 +53,14 @@ export const createNote = async (req, res) => {
 export const updateNote = async (req, res) => {
   try {
     const id = req.params.id;
-    const { title, description, idArray } = req.body;
+    const { title, description, idArray, isHidden } = req.body;
     let updatedNote;
 
     if (idArray) {
       if (!id)
         updatedNote = await Note.updateMany(
           { _id: { $in: idArray } },
-          { isHidden: true, updatedAt: Date.now() },
+          { isHidden, updatedAt: Date.now() },
           { multi: true, new: true }
         );
       else throw new Error("Invalid path");

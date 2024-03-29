@@ -35,11 +35,13 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-userSchema.methods.generateToken = async function () {
+userSchema.methods.generateToken = async function (isRemember = false) {
   const token = jwt.sign({ id: this._id }, JWT_SECRET);
 
-  this.tokens.push(token);
-  await this.save();
+  if (isRemember) {
+    this.tokens.push(token);
+    await this.save();
+  }
 
   return token;
 };
