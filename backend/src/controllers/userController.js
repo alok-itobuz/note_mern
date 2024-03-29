@@ -1,135 +1,129 @@
-import { ReasonPhrases, StatusCodes } from "http-status-codes"
-import User from "../models/userSchema.js"
-import bcrypt from 'bcryptjs'
+import { ReasonPhrases, StatusCodes } from "http-status-codes";
+import User from "../models/userSchema.js";
+import bcrypt from "bcryptjs";
 
-export const getUser = async (req, res) => {
-    try {
-        const findQuery = req.params.id ? { _id: req.params.id } : {}
+export const registerUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
 
-        const allUsers = await User.find(findQuery)
+    const newUser = new User({ name, email, password });
 
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'success',
-            data: {
-                results: allUsers.length,
-                users: allUsers,
-            }
-        })
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
+    await newUser.hashPassword();
 
-export const postUser = async (req, res) => {
-    try {
-        let { name, email, password } = req.body;
+    const result = await newUser.save();
 
-        const newUser = new User({ name, email, password })
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Register successful.",
+      data: result,
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
 
-        newUser.generateToken()
+export const loginUser = async (req, res, next) => {
+  try {
+    let { email, password } = req.body;
 
-        const result = await newUser.save()
+    const user = await User.findOne({ email }, { __v: 0 });
 
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'Data saved successfully',
-            data: result
-        })
+    if (!user) throw new Error("Invalid email");
 
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
+    if (!isPasswordMatch) throw new Error("Invalid password");
 
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
+    const token = await user.generateToken();
 
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Login successful.",
+      data: {
+        user,
+        token,
+      },
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
 
-export const updateUser = async (req, res) => {
-    try {
-        const id = req.params.id
+export const updateUser = async (req, res, next) => {
+  try {
+    // const id = req.id;
 
-        const { name, email, password } = req.body
+    const { name, email, password } = req.body;
 
-        const data = await User.findOneAndUpdate({ _id: id }, {
-            name, email, password
-        }, { new: true })
+    // const user = await User.findOne({ _id: id });
 
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'Data updated successfully',
-            data
-        })
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
+    // if (password) await user.hashPassword(password);
+    if (password) await req.user.hashPassword(password);
 
-export const deleteUser = async (req, res) => {
-    try {
-        const id = req.params.id
+    const data = await req.user.updateOne(
+      { name, email },
+      { new: true, runValidators: true }
+    );
 
-        const foundUser = await User.findOne({ _id: id })
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Data updated successfully",
+      data,
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
 
-        if (!foundUser) throw new Error("User doesn't exist")
-        const data = await foundUser.deleteOne({ _id: id })
+export const logout = async (req, res, next) => {
+  try {
+    await req.user.deleteToken(req.token);
 
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'Data deleted successfully',
-            data
-        })
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Logout successfully",
+      data: null,
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
 
+export const logoutAll = async (req, res, next) => {
+  try {
+    // const id = req.id;
 
-// -------------------------
+    // const foundUser = await User.findOne({ _id: id });
 
-export const registerUser = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
+    // await foundUser.deleteToken();
 
-        const newUser = new User({ name, email, password })
+    await req.user.deleteToken();
 
-        const result = await newUser.save()
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Logout from all devices successfully",
+      data: null,
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
 
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'Register successful.',
-            data: result
-        })
+export const deleteUser = async (req, res, next) => {
+  try {
+    const id = req.id;
 
+    const foundUser = await User.findOne({ _id: id });
 
+    if (!foundUser) throw new Error("User doesn't exist");
+    const data = await foundUser.deleteOne({ _id: id });
 
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
-export const loginUser = async (req, res) => {
-    try {
-        let { email, password } = req.body;
-
-        const user = await User.findOne({ email }, { tokens: 0, password: 0, __v: 0 })
-
-        if (!user) throw new Error('Invalid email')
-
-        const isPasswordMatch = bcrypt.compare(password, user.password)
-        if (!isPasswordMatch) throw new Error('Invalid password')
-
-        const token = await user.generateToken()
-
-        res.status(StatusCodes.OK).json({
-            status: ReasonPhrases.OK,
-            message: 'Login successful.',
-            data: {
-                user,
-                token
-            }
-        })
-
-    } catch (error) {
-        next({ status: 'BAD_REQUEST', error })
-    }
-}
+    res.status(StatusCodes.OK).json({
+      status: ReasonPhrases.OK,
+      message: "Data deleted successfully",
+      data,
+    });
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+};
