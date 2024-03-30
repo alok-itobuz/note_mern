@@ -141,12 +141,16 @@ export const fetchUserDetails = async (state, setState) => {
             },
         });
 
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+
         setState({
             ...state,
             user: response.data.data.user,
             token: response.data.data.token,
         });
-        localStorage.setItem("user", response.data.data.user);
+        console.log({
+            user: response.data.data.user,
+        })
     } catch (error) {
         console.log("fetch user details", error);
     }
