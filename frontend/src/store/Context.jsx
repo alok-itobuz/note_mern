@@ -25,6 +25,9 @@ const Context = ({ children }) => {
 
     if (token) {
       fetchUserDetails(state, setState);
+    } else {
+      localStorage.removeItem("user");
+      localStorage.removeItem("notes");
     }
   }, []);
 

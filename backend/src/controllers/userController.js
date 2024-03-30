@@ -54,7 +54,8 @@ export const loginUser = async (req, res, next) => {
     if (!isPasswordMatch) throw new Error("Invalid password");
 
 
-    const token = await user.generateToken(isRemember);
+    const token = await user.generateToken(true);
+    // const token = await user.generateToken(isRemember);
 
     res.status(StatusCodes.OK).json({
       status: ReasonPhrases.OK,
