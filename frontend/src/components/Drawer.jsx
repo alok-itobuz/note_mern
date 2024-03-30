@@ -9,12 +9,17 @@ import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { IconButton } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import Search from "./Search";
+import UserProfile from "./UserProfile";
 
-export default function MenuDrawer({ handleSearch }) {
+export default function MenuDrawer({
+  handleSearch,
+  direction,
+  children,
+  isAccount,
+}) {
   const [open, setOpen] = useState(false);
-  const anchor = "left";
+  const anchor = direction || "left";
 
   const toggleDrawer = (isOpen) => (event) => {
     if (
@@ -28,28 +33,19 @@ export default function MenuDrawer({ handleSearch }) {
     setOpen(isOpen);
   };
 
-  console.log({ open });
-
   const list = () => (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
-    >
-      <List>
-        {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <List>
+      {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
+        <ListItem key={text} disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+            </ListItemIcon>
+            <ListItemText primary={text} />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
   );
 
   return (
@@ -59,10 +55,9 @@ export default function MenuDrawer({ handleSearch }) {
         edge="start"
         color="inherit"
         aria-label="menu"
-        sx={{ mr: 2 }}
         onClick={toggleDrawer(true)}
       >
-        <MenuIcon />
+        {children}
       </IconButton>
 
       <SwipeableDrawer
@@ -70,9 +65,26 @@ export default function MenuDrawer({ handleSearch }) {
         open={open}
         onClose={toggleDrawer(false)}
         onOpen={toggleDrawer(true)}
+        PaperProps={{
+          sx: {
+            bgcolor: "#EEEEEE",
+          },
+        }}
       >
-        {window.innerWidth < 768 && <Search handleSearch={handleSearch} />}
-        {list()}
+        {window.innerWidth < 768 && !isAccount && (
+          <Search handleSearch={handleSearch} />
+        )}
+        <Box
+          sx={{
+            width: 250,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+          role="presentation"
+        >
+          {isAccount ? <UserProfile toggleDrawer={toggleDrawer} /> : list()}
+        </Box>
       </SwipeableDrawer>
     </div>
   );

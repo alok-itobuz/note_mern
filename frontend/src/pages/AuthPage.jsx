@@ -1,20 +1,20 @@
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { TopLevelContext } from "../store/Context";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { TopLevelContext } from "../store/Context";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -37,16 +37,14 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function AuthPage() {
+  const navigate = useNavigate();
+  const { state, setState } = useContext(TopLevelContext);
+  useEffect(() => {
+    if (state?.token) navigate("/");
+  }, []);
+
   const [isRegister, setIsRegister] = useState(false);
   const [isRemember, setIsRemember] = useState(false);
-
-  const navigate = useNavigate();
-
-  const { state, setState } = useContext(TopLevelContext);
-
-  useEffect(() => {
-    if (state.token) navigate("/");
-  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -77,7 +75,6 @@ export default function AuthPage() {
           "authToken",
           JSON.stringify(response.data.data.token)
         );
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
       }
       setState({
         ...state,
@@ -87,9 +84,17 @@ export default function AuthPage() {
       });
       navigate("/");
     } else {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
       setIsRegister(false);
     }
   };
+
+  const textFieldsArray = [
+    { value: "name", label: "Name" },
+    { value: "email", label: "Email address" },
+    { value: "password", label: "Password" },
+  ];
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -115,38 +120,23 @@ export default function AuthPage() {
             noValidate
             sx={{ mt: 1 }}
           >
-            {isRegister && (
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Name"
-                name="name"
-                autoComplete="name"
-                autoFocus
-              />
+            {textFieldsArray.map(
+              ({ value, label }, i) =>
+                (isRegister || value !== "name") && (
+                  <TextField
+                    key={i}
+                    margin="normal"
+                    required
+                    fullWidth
+                    id={value}
+                    label={label}
+                    name={value}
+                    autoComplete={value}
+                    autoFocus
+                  />
+                )
             )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
+
             {!isRegister && (
               <FormControlLabel
                 control={

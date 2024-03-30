@@ -1,17 +1,36 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TopLevelContext } from "../store/Context";
 import Navbar from "../components/Navbar";
+import axios from "axios";
+import { handleError } from "../handlers/handleErros";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { state } = useContext(TopLevelContext);
+  const { state, setState } = useContext(TopLevelContext);
+  const [notes, setNotes] = useState(null);
 
   useEffect(() => {
-    if (!state.token) navigate("/auth");
+    if (!state?.token) navigate("/auth");
+
+    const fetchNotes = async () => {
+      try {
+        const response = await axios({
+          method: "get",
+          url: `${import.meta.env.VITE_BASE_URL}/note`,
+          headers: {
+            Authorization: `Bearer ${state?.token}`,
+          },
+        });
+        console.log({ response });
+      } catch (error) {
+        handleError(error.response.data.message, state, setState, navigate);
+      }
+    };
+
+    fetchNotes();
   }, []);
 
-  console.log("home page");
   return (
     <>
       <Navbar />

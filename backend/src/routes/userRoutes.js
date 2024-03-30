@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   deleteUser,
+  getUserDetails,
   loginUser,
   logout,
   logoutAll,
@@ -14,6 +15,7 @@ const userRouter = Router();
 
 userRouter
   .route("/")
+  .get(authMiddleware, getUserDetails)
   .patch(authMiddleware, updateUser)
   .delete(authMiddleware, deleteUser);
 

@@ -3,3 +3,11 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.my-swal {
+  z-index: 2000 !important;
+}
+
+.MuiDrawer-paper {
+  /* background-color: #535C91 !important; */
+}
