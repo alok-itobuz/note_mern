@@ -1,5 +1,54 @@
 import axios from "axios";
 import showAlert from "./showAlert";
+import { handleError } from "./handleErros";
+
+export const handleAuthenticate = async (event, state, setState, isRegister, setIsRegister, isRemember, navigate) => {
+    try {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+
+        let axiosData = {
+            email: formData.get("email"),
+            password: formData.get("password"),
+            isRemember,
+        };
+
+        if (isRegister) axiosData = { ...axiosData, name: formData.get("name") };
+
+        const response = await axios({
+            method: "post",
+            url: `${import.meta.env.VITE_BASE_URL}/user/${isRegister ? "register" : "login"
+                }`,
+            data: axiosData,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!isRegister) {
+            if (isRemember) {
+                localStorage.setItem(
+                    "authToken",
+                    JSON.stringify(response.data.data.token)
+                );
+            }
+            setState({
+                ...state,
+                user: response.data.data.user,
+                token: response.data.data.token,
+                isRemember,
+            });
+            navigate("/");
+        } else {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("user");
+            setIsRegister(false);
+        }
+    } catch (error) {
+        console.log("login error", error);
+        handleError(error.response.data.message);
+    }
+};
 
 export const handleUpdateUser = async (e, state, setState, setIsEdit, toggleDrawer) => {
     try {

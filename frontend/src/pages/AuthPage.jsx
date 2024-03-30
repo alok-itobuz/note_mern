@@ -1,8 +1,7 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { TopLevelContext } from "../store/Context";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
@@ -15,6 +14,7 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Container from "@mui/material/Container";
+import { handleAuthenticate } from "../handlers/handleApiCalls";
 
 function Copyright(props) {
   return (
@@ -46,49 +46,54 @@ export default function AuthPage() {
   const [isRegister, setIsRegister] = useState(false);
   const [isRemember, setIsRemember] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  // const handleSubmit = async (event) => {
+  //   try {
+  //     event.preventDefault();
+  //     const formData = new FormData(event.currentTarget);
 
-    let axiosData = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      isRemember,
-    };
+  //     let axiosData = {
+  //       email: formData.get("email"),
+  //       password: formData.get("password"),
+  //       isRemember,
+  //     };
 
-    if (isRegister) axiosData = { ...axiosData, name: formData.get("name") };
+  //     if (isRegister) axiosData = { ...axiosData, name: formData.get("name") };
 
-    const response = await axios({
-      method: "post",
-      url: `${import.meta.env.VITE_BASE_URL}/user/${
-        isRegister ? "register" : "login"
-      }`,
-      data: axiosData,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  //     const response = await axios({
+  //       method: "post",
+  //       url: `${import.meta.env.VITE_BASE_URL}/user/${
+  //         isRegister ? "register" : "login"
+  //       }`,
+  //       data: axiosData,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
 
-    if (!isRegister) {
-      if (isRemember) {
-        localStorage.setItem(
-          "authToken",
-          JSON.stringify(response.data.data.token)
-        );
-      }
-      setState({
-        ...state,
-        user: response.data.data.user,
-        token: response.data.data.token,
-        isRemember,
-      });
-      navigate("/");
-    } else {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      setIsRegister(false);
-    }
-  };
+  //     if (!isRegister) {
+  //       if (isRemember) {
+  //         localStorage.setItem(
+  //           "authToken",
+  //           JSON.stringify(response.data.data.token)
+  //         );
+  //       }
+  //       setState({
+  //         ...state,
+  //         user: response.data.data.user,
+  //         token: response.data.data.token,
+  //         isRemember,
+  //       });
+  //       navigate("/");
+  //     } else {
+  //       localStorage.removeItem("authToken");
+  //       localStorage.removeItem("user");
+  //       setIsRegister(false);
+  //     }
+  //   } catch (error) {
+  //     console.log("login error", error);
+  //     handleError(error.response.data.message);
+  //   }
+  // };
 
   const textFieldsArray = [
     { value: "name", label: "Name" },
@@ -116,7 +121,17 @@ export default function AuthPage() {
           </Typography>
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={(e) =>
+              handleAuthenticate(
+                e,
+                state,
+                setState,
+                isRegister,
+                setIsRegister,
+                isRemember,
+                navigate
+              )
+            }
             noValidate
             sx={{ mt: 1 }}
           >
