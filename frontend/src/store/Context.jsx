@@ -14,7 +14,7 @@ const Context = ({ children }) => {
     return {
       user,
       token,
-      notes: {},
+      notes: [{}],
       isRemember: null,
     };
   });
@@ -34,11 +34,19 @@ const Context = ({ children }) => {
     if (!state) {
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("notes");
     } else {
       const token = JSON.parse(localStorage.getItem("authToken"));
       token && localStorage.setItem("user", JSON.stringify(state?.user));
     }
   }, [state]);
+
+  // after login and whenever the notes are updated, those will be stored inside localstorage localstorage
+  useEffect(() => {
+    state?.notes
+      ? localStorage.setItem("notes", JSON.stringify(state?.notes))
+      : localStorage.removeItem("notes");
+  }, [state.notes]);
 
   return (
     <TopLevelContext.Provider value={{ state, setState }}>

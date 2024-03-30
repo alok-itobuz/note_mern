@@ -22,7 +22,8 @@ const HomePage = () => {
             Authorization: `Bearer ${state?.token}`,
           },
         });
-        console.log({ response });
+        console.log({ notes: response.data.data.notes });
+        setState({ ...state, notes: response.data.data.notes });
       } catch (error) {
         handleError(error.response.data.message, state, setState, navigate);
       }
