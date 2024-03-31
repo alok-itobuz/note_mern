@@ -148,10 +148,99 @@ export const fetchUserDetails = async (state, setState) => {
             user: response.data.data.user,
             token: response.data.data.token,
         });
-        console.log({
-            user: response.data.data.user,
-        })
     } catch (error) {
         console.log("fetch user details", error);
     }
 };
+
+export const createOrUpdateNote = async (
+    state,
+    title,
+    description,
+    isCreate,
+    id
+) => {
+    try {
+        let axiosData = {};
+        if (title) axiosData = { ...axiosData, title };
+        if (description) axiosData = { ...axiosData, description };
+
+        const response = await axios({
+            method: isCreate ? "post" : "patch",
+            url: `${import.meta.env.VITE_BASE_URL}/note/${!isCreate ? id : ""}`,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${state?.token}`,
+            },
+            data: axiosData,
+        });
+
+    } catch (error) {
+        console.log("create note error", error);
+    }
+};
+
+export const fetchNotes = async (state, setState, query, navigate) => {
+    try {
+        const response = await axios({
+            method: "get",
+            url: `${import.meta.env.VITE_BASE_URL}/note${query}`,
+            headers: {
+                Authorization: `Bearer ${state?.token}`,
+            },
+        });
+
+        setState({ ...state, notes: response.data.data.notes });
+    } catch (error) {
+        handleError(error.response.data.message, state, setState, navigate);
+    }
+};
+
+export const hideNotes = async (state, setState, selectedNotes, setSelectedNotes, setHideCheckbox, isCurrentPageHidden) => {
+    try {
+        if (selectedNotes.length === 0) {
+            return showAlert("Error", "Select atleast 1 note", "error");
+        }
+
+        await axios({
+            method: "patch",
+            url: `${import.meta.env.VITE_BASE_URL}/note`,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${state?.token}`,
+            },
+            data: {
+                idArray: selectedNotes,
+                isHidden: !isCurrentPageHidden,
+            },
+        });
+
+        fetchNotes(
+            state,
+            setState,
+            isCurrentPageHidden
+                ? "?search[isHidden]=true"
+                : "?search[isHidden]=false"
+        );
+
+        setSelectedNotes([]);
+        setHideCheckbox(true);
+    } catch (error) {
+        console.log("make hidden error", error);
+    }
+};
+
+export const deleteNote = async (state, id) => {
+    try {
+        const response = await axios({
+            method: "delete",
+            url: `${import.meta.env.VITE_BASE_URL}/note/${id}`,
+            headers: {
+                Authorization: `Bearer ${state?.token}`,
+            },
+        });
+
+    } catch (error) {
+        handleError(error.response.data.message, state, setState, navigate);
+    }
+}

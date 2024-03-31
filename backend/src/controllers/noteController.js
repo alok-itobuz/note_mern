@@ -6,6 +6,7 @@ export const getNotes = async (req, res, next) => {
   try {
     const id = req.params.id;
     const userIdQuery = { userId: req.user._id };
+
     const findQuery = id ? { _id: id } : { ...userIdQuery };
 
 
@@ -17,7 +18,8 @@ export const getNotes = async (req, res, next) => {
 
     const notes = await updatedState.queryMongoose;
 
-    if (notes.length === 0) throw new Error("You don't have any note.");
+    console.log(notes)
+
 
     res.status(StatusCodes.OK).send({
       status: ReasonPhrases.OK,
@@ -32,11 +34,9 @@ export const getNotes = async (req, res, next) => {
   }
 };
 
-export const createNote = async (req, res) => {
+export const createNote = async (req, res, next) => {
   try {
     const { title, description } = req.body;
-
-    console.log({ title, description })
 
     const newNote = new Note({ title, description, userId: req.user._id });
 
@@ -52,7 +52,7 @@ export const createNote = async (req, res) => {
   }
 };
 
-export const updateNote = async (req, res) => {
+export const updateNote = async (req, res, next) => {
   try {
     const id = req.params.id;
     const { title, description, idArray, isHidden } = req.body;
@@ -83,7 +83,7 @@ export const updateNote = async (req, res) => {
   }
 };
 
-export const deleteNote = async (req, res) => {
+export const deleteNote = async (req, res, next) => {
   try {
     const id = req.params.id;
 

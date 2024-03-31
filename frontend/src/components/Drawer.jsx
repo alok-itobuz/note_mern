@@ -7,16 +7,17 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import NotesIcon from "@mui/icons-material/Notes";
 import { IconButton } from "@mui/material";
 import Search from "./Search";
 import UserProfile from "./UserProfile";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function MenuDrawer({
-  handleSearch,
   direction,
   children,
   isAccount,
+  setIsCurrentPageHidden,
 }) {
   const [open, setOpen] = useState(false);
   const anchor = direction || "left";
@@ -35,11 +36,20 @@ export default function MenuDrawer({
 
   const list = () => (
     <List>
-      {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-        <ListItem key={text} disablePadding>
+      {["Visible", "Hidden"].map((text, index) => (
+        <ListItem
+          key={text}
+          disablePadding
+          onClick={() => {
+            index === 0
+              ? setIsCurrentPageHidden(false)
+              : setIsCurrentPageHidden(true);
+            setOpen(false);
+          }}
+        >
           <ListItemButton>
             <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              {index === 0 ? <NotesIcon /> : <VisibilityOffIcon />}
             </ListItemIcon>
             <ListItemText primary={text} />
           </ListItemButton>
@@ -71,9 +81,7 @@ export default function MenuDrawer({
           },
         }}
       >
-        {window.innerWidth < 768 && !isAccount && (
-          <Search handleSearch={handleSearch} />
-        )}
+        {window.innerWidth < 768 && !isAccount && <Search />}
         <Box
           sx={{
             width: 250,

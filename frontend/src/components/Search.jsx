@@ -1,10 +1,15 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
+import { TopLevelContext } from "../store/Context";
+import { useNavigate } from "react-router-dom";
+import { fetchNotes } from "../handlers/handleApiCalls";
 
-const Search = ({ handleSearch }) => {
+const Search = ({}) => {
   const searchRef = useRef();
+  const { state, setState } = useContext(TopLevelContext);
+  const navigate = useNavigate();
 
   const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -48,6 +53,15 @@ const Search = ({ handleSearch }) => {
     },
   }));
 
+  const handleSearch = (e) => {
+    if (e.key.toLowerCase() !== "enter") return;
+
+    const searchText = searchRef.current.value;
+    searchRef.current.value = "";
+
+    fetchNotes(state, setState, `?search[title]=${searchText}`, navigate);
+  };
+
   return (
     <Search>
       <SearchIconWrapper>
@@ -57,13 +71,7 @@ const Search = ({ handleSearch }) => {
         placeholder="Search…"
         inputProps={{ "aria-label": "search" }}
         inputRef={searchRef}
-        onKeyDown={(e) => {
-          if (e.key.toLowerCase() !== "enter") return;
-
-          const searchText = searchRef.current.value;
-          searchRef.current.value = "";
-          handleSearch(searchText);
-        }}
+        onKeyDown={handleSearch}
       />
     </Search>
   );
