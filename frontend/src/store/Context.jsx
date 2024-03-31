@@ -49,7 +49,7 @@ const Context = ({ children }) => {
     state?.notes
       ? localStorage.setItem("notes", JSON.stringify(state?.notes))
       : localStorage.removeItem("notes");
-  }, [state.notes]);
+  }, [state?.notes]);
 
   return (
     <TopLevelContext.Provider value={{ state, setState }}>
