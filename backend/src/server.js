@@ -3,9 +3,8 @@ import connectDB from "./db/conn.js";
 import express from "express";
 import userRouter from "./routes/userRoutes.js";
 import noteRouter from "./routes/noteRoutes.js";
-import authMiddleware from "./middlewares/authMiddleware.js";
-import { noRoute } from "./controllers/errorRoute.js";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
+import cors from 'cors'
 
 connectDB();
 
@@ -13,6 +12,7 @@ const app = express();
 
 // middlewares
 app.use(express.json());
+app.use(cors())
 
 // routes
 app.use("/api/user", userRouter);

@@ -13,6 +13,7 @@ export default async function (req, res, next) {
     const user = await User.findOne({ _id: payload.id }, { __v: 0 });
     if (!user) throw new Error("Invalid payload");
 
+
     const isValidToken = !!user.tokens.find((t) => t === token);
     if (!isValidToken) throw new Error("Token is expired.");
 

@@ -2,6 +2,25 @@ import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import User from "../models/userSchema.js";
 import bcrypt from "bcryptjs";
 
+export const getUserDetails = async (req, res, next) => {
+  try {
+    res.status(StatusCodes.ACCEPTED).json({
+      status: ReasonPhrases.OK,
+      message: "Success",
+      data: {
+        user: {
+          _id: req.id,
+          name: req.user.name,
+          email: req.user.email,
+        },
+        token: req.token,
+      },
+    })
+  } catch (error) {
+    next({ status: "BAD_REQUEST", error });
+  }
+}
+
 export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -24,7 +43,7 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    let { email, password } = req.body;
+    let { email, password, isRemember } = req.body;
 
     const user = await User.findOne({ email }, { __v: 0 });
 
@@ -34,13 +53,19 @@ export const loginUser = async (req, res, next) => {
 
     if (!isPasswordMatch) throw new Error("Invalid password");
 
-    const token = await user.generateToken();
+
+    const token = await user.generateToken(true);
+    // const token = await user.generateToken(isRemember);
 
     res.status(StatusCodes.OK).json({
       status: ReasonPhrases.OK,
       message: "Login successful.",
       data: {
-        user,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        },
         token,
       },
     });
